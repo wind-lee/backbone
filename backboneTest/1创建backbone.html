@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>创建backbone</title>
+    <script src="js/jquery.js"></script>
+    <script src="js/underscore.js"></script>
+    <script src="js/backbone.js"></script>
+</head>
+<body>
+<script>
+//    1.创建模型
+//    var model=new Backbone.Model();  //创建模型
+//    var collection=new Backbone.Collection();  //创建模型集合
+//    var view=new Backbone.View();  //创建试图
+//
+//    创建模型,给模型添加值
+//    var m=new Backbone.Model();
+//    m.set("name","hello");
+//    console.log(m.get("name"))
+
+//    2.模型集合
+//    var model1=new Backbone.Model({"a":"1"});
+//    var model2=new Backbone.Model({"b":"2"});
+//    var collection=new Backbone.Collection();
+//    collection.add(model1);
+//    collection.add(model2);
+//    console.log(JSON.stringify(collection))
+//    console.log(model1.get("a"))
+
+//    3.构造函数添加实例和静态方法
+//    var model=Backbone.Model.extend({
+//        aaa:function(){  //实例方法,只能对象.名称调用
+//            alert(1);
+//        },
+//        bbb:function(){ //静态方法,即可对象.名称,又可类名.名称
+//            alert(2);
+//        }
+//    });
+//    var m=new model;
+//    m.aaa();        //实例调用
+//    model.bbb();    //静态调用,但是会报错
+
+//    4.往继承默认函数值里面添加东西
+//      var model=Backbone.Model.extend({
+//          defaults:function(){
+//              name:'hello'
+//          }
+//      });
+//      var m=new model;
+//      m.set("name","18");
+//      alert(m.get("name"))
+
+//    5.继承再继承
+//    var model=Backbone.Model.extend({
+//        a:function(){
+//            alert(1)
+//        }
+//    });
+//    var m=model.extend();
+//    var mm=new m;
+//    mm.a();   //要先继承再调用,也就是不能先new,然后在继承new的,而应该先继承在new;
+
+//    6.自定义事件
+    var model=Backbone.Model.extend({
+        defaults:function(){
+            name:"hello"
+        },
+        initialize:function(){
+            this.on("name","change",this.show);
+        },
+        show
+    });
+
+
+
+</script>
+</body>
+</html>

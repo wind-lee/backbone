@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="js/jquery.js"></script>
+    <script src="js/underscore.js"></script>
+    <script src="js/backbone.js"></script>
+</head>
+<body>
+
+<!--未知图片宽高要水平垂直居中的几种方法:-->
+<!--1.display:table-cell;水平;vertical middle垂直-->
+<!--2.父元素需要display:flex;align-self:center;-->
+<!--3.transform:translate(-50%,-50%)-->
+
+<script>
+//    一，创建对象
+//    1.创建对象
+    var model=new Backbone.Model(); //构造模型
+    var models=new Backbone.Collection();// 调用集合模型数据
+    var view=new Backbone.View();//调用backbone封装好的试图
+
+//    2.创建对象，给对象加方法
+    var model=new Backbone.Model();
+    model.set("name","hello");
+    alert(model,get("name"));
+
+//    3.模型联合集合模型
+    var model1=new Backbone.Model({"name":"hello"});
+    var model2=new Backbone.Model({"name":"hi"});
+    var models=new Backbone.Collection();
+    models.add(model1);
+    models.add(model2);
+    alert(JSON.stringify(models));
+
+//    二，给构造函数添加实例方法和静态方法
+//    4.给构造函数添加实例方法和静态方法
+//      实例方法与静态方法的区别是：在外部调用静态方法可以用“类名.方法名”，也可以用“对象名.方法名”，
+//      而实例方法只有“对象名.方法名”
+    var M=Backbone.Model.extend({
+            aaa:function(){ //实例方法
+                alert(123);
+            },
+            bbb:function(){ //静态方法
+                alert(456);
+            }
+        });
+    var model=new M;
+    model.aaa();//实例调用
+    M.bbb();//静态调用
+
+//    5.往继承默认值里面添加东西，然后调用
+    var M=Backbone.Model.extend({
+        defaults:{
+            name:"hello"
+        }
+    });
+    var model=new M;
+    alert(model.get('name'));
+
+//    三，继承操作（实例和静态方法）
+    var M=Backbone.Model.extend(  //给继承添加实例方法
+        aaa:function(){
+            alert(123);
+        }
+    });
+
+    var childM=M.extend();  //添加好后实例方法，在给childM加实例方法和静态方法（现在只是简单的继承）
+    var model=new childM;
+    model.aaa();
+
+//    四，自定义事件
+    var M=Backbone.Model.extend({
+        defaults:function(){
+            name:'hello'
+        },
+        initialize:function(){ //初始化构造函数
+            this.on('change',function(){  //加on时间，change的触发条件，当模式中的数据发生改变的时候执行
+                alert(123);
+            })
+        }
+    });
+    var model=new M;
+    model.set('name','hi');  //改变初始化构造函数，
+
+
+//    2.指定的键发生变化的触发事件
+    var M=Backbone.Model.extend({
+        defaults:{
+            name:'hello'
+        },
+        initialize:function(){  //指定默认数据的值发生变动就触发
+            this.on('change:name',function(model){
+                console.log(model);
+            })
+        }
+    });
+    var model=new M;
+    model.set('name','hi')
+
+//    3.模型跟试图联系一起
+    $(function(){
+        var M=Backbone.Model.extend({
+            defaults:function(){
+                name:'hello'
+            }
+        });
+        var v=Backbone.View.extend({
+            initialize:function(){  //用listenTo多添加一个参数，参数1是获取作用域下的model模型，如果发生改变就触发执行show函数；
+                this.listenTo(this.model,'change',this.show);
+            },
+            show:function(model){
+                $('body').append('<div>'+model.get('name')+'</div>');
+            }
+        });
+        var m=new M;             //创建模型对象
+        var v=new v({model:m});  //给试图传参，把模型传进去，模型的m函数；
+        m.set('name','hi');     //改变模型的name的key值
+    });
+
+
+//    五，数据与服务器操作
+    Backbone.sync=function(method,model){  //method有四个参数，增删改查，打印这个可以根据提交的过程来改变一些东西
+        alert(method+':'+JSON.stringify(model));
+        model.id=1;
+    };
+    var M=Backbone.Model.extend({
+        defaults:{
+            name:'hello'
+        },
+        url:'/user'  //向后台ajax提交地址
+    });
+    var m=new M;
+    m.save();  //提交到后台
+    m.save('name','hi');  //再次提交，修改了参数
+
+
+//    2.从服务器获取数据，用collection模型集合里的fetch();
+    Backbone.sync=function(method,model){
+        alert(method+':'+JSON.stringify(model));
+    };
+    var C=Backbone.Collection.extend({
+        defaults:{
+            this.on('reset',function(){  //从服务器获取数据成功之后会触发这个事件，可以根据获取成功之后做一些事情
+                alert(123);
+        });
+        }
+    });
+    var m=new C;
+    m.fetch();   //让集合模型从服务器获取数据
+
+    //六，路由历史管理
+    var Router=Backbone.Router.extend({
+        routers:{      //:query也就是可以是任何参数后缀
+            "help":"aFun",          //#help的后缀的时候执行aFun函数
+            "search/:query":"search",//#search/kiwis的时候或者#search/任何,的时候执行search函数
+            "search/:query/p:page":"search" //#search/aaa/p1的时候执行search函数
+        },
+        help:function(){
+            alert("help函数");
+        },
+        search:function(query,page){
+            console.log(query, page); //打印url栏的获取参数
+            alert("search函数");
+        }
+    });
+    var R=new Router;
+    Backbone.history.start();  //必须写这个,不然router启动不了;backbone的哈希开始启动;
+
+
+//    七,事件委托
+    var V=Backbone.View.extend({
+        el:$("body"), //指的是当前的委托人,触发的委托
+        events:{       //事件
+            'click input':'aaa',  //事件空格,input,aaa函数
+            'mouseover li':'bbb'    //事件空格,bbb函数
+        },
+        aaa:function(){
+            alert(111);
+        },
+        bbb:function(){
+            alert(222);
+        }
+    });
+    var view=new V;
+
+//    <input type="button" value="input点击">
+//    <ul>
+//        <li>1111</li>
+//        <li>1111</li>
+//        <li>1111</li>
+//        <li>1111</li>
+//    </ul>
+
+
+    //八,前端模版
+    var M=Backbone.Model.extend({
+        defaults:{
+            name:"hello"
+        }
+    });
+    var V=Backbone.View.extend({
+        initalize:function(){
+            this.listenTo(this.model,'change',this.show); //监听模型,模型数据改变就触发调用show函数
+        },
+        show:function(model){
+            $("body").append('<div>'+model.get('name')+'</div>');  //获取传进来的模型namekey的值
+        }
+    });
+
+    var m=new M;  //构造模型
+    var v=new V({model:m});  //给视图传模型,初始化里面会开始监听
+    m.set('name','hi');   //给构造的m模型设置name键值,这时候V的视图会监听change改变而触发show函数
+
+//    2,模版引用
+    var M=Backbone.Model.extend({
+        defaults:{
+            name:'hello'
+        }
+    });
+    var V=Backbone.View.extend({
+        initalize:function(){
+            this.listenTo(this.model,'change',this.show);//2.模型数据改变会触发show
+        },
+        show:function(){
+            //3.show函数调用template模版,this.model.toJSON()把模型里的键值对(name=hi)转成json字符串,添加到template模版当中
+            $("body").append(this.template(this.model.toJSON());
+        },
+        template:_.template($("template").html()); //获取模版内容给_.template
+    });
+    var m=new M;
+    var v=new V({model:m});
+    m.set("name",'hi');  //1.添加会触发listenTo,会调用show函数
+
+    //<script type="text/template" id="template">
+        //<div><%= name %></div>
+    // </script>
+
+    <script type="text/template" id="template">
+        <% for(var i=0;i<array.length;i++){ %>
+        <div><%= name %></div>                  //4.得到name=hi的json字符串
+        <% { %>
+    </script>
+
+
+</script>
+</body>
+</html>
